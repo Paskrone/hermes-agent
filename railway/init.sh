@@ -44,6 +44,38 @@ if os.environ.get("HERMES_DEFAULT_MODEL"):
     config["model"]["default"] = os.environ["HERMES_DEFAULT_MODEL"]
     changes.append(f"model.default={config['model']['default']}")
 
+# --- Cost-optimized config block (Pascal explicit 2026-05-14, screenshot 1:1) ---
+# Provider, per-role models, fallback chain. Hartkodiert weil Pascal die exakte
+# Liste aus einem Tutorial-Screenshot übernehmen wollte. Risiken (CN-Provider
+# für CEELIS-Daten, Tool-Calling-Qualität bei OSS-Modellen) sind ihm bewusst.
+# Wenn Änderungen nötig: dieses Block editieren + neuer Commit.
+config["model"]["provider"] = "openrouter"
+config["model"]["roles"] = {
+    "explorer": "qwen/qwen3-coder:free",
+    "planner": "minimax/minimax-m2.7",
+    "executor": "deepseek/deepseek-v4-flash",
+    "reviewer": "moonshotai/kimi-k2.6",
+    "vision": "google/gemma-4-26b-a4b-it:free",
+}
+config["model"]["fallback"] = [
+    "deepseek/deepseek-v4-flash",
+    "google/gemma-3-12b-it:free",
+]
+changes.append("model.provider=openrouter, model.roles, model.fallback")
+
+config["provider_routing"] = {
+    "sort": "price",
+    "data_collection": "deny",
+    "require_parameters": True,
+}
+changes.append("provider_routing")
+
+config["compression"] = {
+    "enabled": True,
+    "threshold": 0.50,
+}
+changes.append("compression.threshold=0.50")
+
 # --- Delegation model — für sub-agent task offload auf günstigerem Modell ---
 if os.environ.get("HERMES_DELEGATION_MODEL"):
     config.setdefault("delegation", {})
