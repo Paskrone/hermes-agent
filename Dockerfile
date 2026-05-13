@@ -115,3 +115,13 @@ ENV HERMES_HOME=/opt/data
 ENV PATH="/opt/data/.local/bin:${PATH}"
 VOLUME [ "/opt/data" ]
 ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
+
+# ---------- Railway customization (Paskrone-fork only) ----------
+# Inject railway/init.sh as a wrapper that templates config.yaml from ENVs
+# before handing off to hermes. Non-invasive: only triggers when CMD is
+# bash -c with our init.sh path.
+COPY railway/ /opt/hermes/railway/
+RUN chmod +x /opt/hermes/railway/init.sh
+
+# Default to running the gateway with config injection from ENVs.
+CMD ["bash", "-c", "/opt/hermes/railway/init.sh gateway run"]
