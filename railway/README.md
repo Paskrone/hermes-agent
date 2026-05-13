@@ -21,7 +21,8 @@ Dieser Fork wird auf [Railway](https://railway.com) im Service `hermes` deployed
 | Name | Default |
 |---|---|
 | `CEELIS_MCP_URL` | `https://api.kundenportal.ceelis.com/functions/v1/mcp` |
-| `HERMES_DEFAULT_MODEL` | `anthropic/claude-sonnet-4-5` |
+| `HERMES_DEFAULT_MODEL` | unset — wenn gesetzt: überschreibt `model.default` in `/opt/data/config.yaml` bei jedem Boot. Aktuell: `anthropic/claude-sonnet-4` |
+| `HERMES_DELEGATION_MODEL` | unset — wenn gesetzt: `delegation.model` für sub-agent task offload. Aktuell: `deepseek/deepseek-chat-v3-0324` |
 | `HERMES_DASHBOARD` | unset (1 = expose dashboard auf 0.0.0.0:9119) |
 | `GROQ_API_KEY` | unset — wenn gesetzt: STT-Provider auf `groq` (Whisper) |
 | `OPENROUTER_API_KEY` | unset — wenn gesetzt: Auxiliary-Tasks (vision/web/search/title/approval/triage/compression) auf OpenRouter/Gemini-Flash umgeleitet (~50-70% Cost-Reduction) |
