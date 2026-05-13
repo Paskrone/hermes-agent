@@ -10,7 +10,8 @@
 #   CEELIS_MCP_BEARER
 # Optional ENVs:
 #   CEELIS_MCP_URL          (default: https://api.kundenportal.ceelis.com/functions/v1/mcp)
-#   HERMES_DEFAULT_MODEL    (default: anthropic/claude-sonnet-4-5)
+#   HERMES_DEFAULT_MODEL    (presence → overrides model.default in config.yaml on every boot)
+#   HERMES_DELEGATION_MODEL (presence → sets delegation.model for cheap sub-agent task offload)
 #   GROQ_API_KEY            (presence → STT-Provider switched to groq)
 #   OPENROUTER_API_KEY      (presence → auxiliary side-tasks routed to OpenRouter/Gemini-Flash)
 #   HERMES_AUX_MODEL        (default: google/gemini-2.5-flash — used for vision/web/search/titles/approval/triage)
@@ -34,11 +35,20 @@ if path.exists():
 
 changes = []
 
-# --- Model-Default (nicht überschreiben falls User schon was anderes gesetzt hat) ---
+# --- Main model — IMMER aus ENV setzen wenn vorhanden (überschreibt existing) ---
+# Frühere Versionen haben hier nur ein fallback gesetzt (`if not …`), was dazu führte
+# dass ein einmal in first-boot gewähltes Modell (z.B. Opus) niemals via Railway-ENV
+# wieder runter-konfiguriert werden konnte. Jetzt: ENV gewinnt, jedes Boot.
 config.setdefault("model", {})
-if not config["model"].get("default"):
-    config["model"]["default"] = os.environ.get("HERMES_DEFAULT_MODEL", "anthropic/claude-sonnet-4-5")
+if os.environ.get("HERMES_DEFAULT_MODEL"):
+    config["model"]["default"] = os.environ["HERMES_DEFAULT_MODEL"]
     changes.append(f"model.default={config['model']['default']}")
+
+# --- Delegation model — für sub-agent task offload auf günstigerem Modell ---
+if os.environ.get("HERMES_DELEGATION_MODEL"):
+    config.setdefault("delegation", {})
+    config["delegation"]["model"] = os.environ["HERMES_DELEGATION_MODEL"]
+    changes.append(f"delegation.model={config['delegation']['model']}")
 
 # --- CEELIS-Portal-MCP (immer aus ENV neu setzen — Bearer kann rotieren) ---
 if os.environ.get("CEELIS_MCP_BEARER"):
