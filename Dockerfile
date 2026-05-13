@@ -113,7 +113,9 @@ RUN uv pip install --no-cache-dir --no-deps -e "."
 ENV HERMES_WEB_DIST=/opt/hermes/hermes_cli/web_dist
 ENV HERMES_HOME=/opt/data
 ENV PATH="/opt/data/.local/bin:${PATH}"
-VOLUME [ "/opt/data" ]
+# VOLUME directive removed for Railway compatibility — Railway refuses
+# Dockerfile VOLUMEs and wants the mount managed via its own Volumes feature.
+# Upstream had: VOLUME [ "/opt/data" ]
 ENTRYPOINT [ "/usr/bin/tini", "-g", "--", "/opt/hermes/docker/entrypoint.sh" ]
 
 # ---------- Railway customization (Paskrone-fork only) ----------
